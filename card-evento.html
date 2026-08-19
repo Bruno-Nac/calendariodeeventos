@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop — Sua Carreira rumo ao Conselho</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0a;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 620px;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(201,168,76,.15), 0 32px 80px rgba(0,0,0,.8);
+  }
+
+  /* ── TOP BANNER ── */
+  .banner {
+    background: linear-gradient(135deg, #0d0d0d 0%, #1a1408 50%, #0d0d0d 100%);
+    border-bottom: 1px solid #2a2a2a;
+    padding: 32px 36px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .banner::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, #c9a84c, #e2c06a, #c9a84c, transparent);
+  }
+  .banner::after {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(201,168,76,.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .tag-live {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(192,57,43,.15); border: 1px solid rgba(192,57,43,.4);
+    color: #e74c3c; border-radius: 20px;
+    padding: 4px 12px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+  .tag-live .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #e74c3c;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .event-type {
+    font-size: 12px; font-weight: 600; color: #c9a84c;
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .event-title {
+    font-size: 26px; font-weight: 800; color: #f0f0f0;
+    line-height: 1.25; margin-bottom: 6px;
+  }
+  .event-title span { color: #c9a84c; }
+  .event-sub {
+    font-size: 13px; color: #888; font-weight: 400; line-height: 1.5;
+  }
+
+  /* ── META ROW ── */
+  .meta-row {
+    display: flex; gap: 0;
+    border-bottom: 1px solid #2a2a2a;
+    background: #0e0e0e;
+  }
+  .meta-item {
+    flex: 1; padding: 16px 20px;
+    border-right: 1px solid #2a2a2a;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .meta-item:last-child { border-right: none; }
+  .meta-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .meta-value { font-size: 15px; font-weight: 700; color: #f0f0f0; }
+  .meta-value.gold { color: #c9a84c; }
+
+  /* ── BODY ── */
+  .body { padding: 28px 36px; }
+
+  /* ── HOST ── */
+  .host-row {
+    display: flex; align-items: center; gap: 14px;
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 24px;
+  }
+  .host-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg, #c9a84c, #9a7a30);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: #000; flex-shrink: 0;
+  }
+  .host-info .host-name { font-size: 14px; font-weight: 700; color: #f0f0f0; }
+  .host-info .host-role { font-size: 12px; color: #888; margin-top: 2px; }
+
+  .with-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+    font-size: 12px; color: #666;
+  }
+  .with-row::before, .with-row::after { content:''; flex:1; height:1px; background:#1f1f1f; }
+  .with-badge {
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 12px; color: #888; white-space: nowrap;
+  }
+  .with-badge strong { color: #c9a84c; }
+
+  /* ── INTRO ── */
+  .intro {
+    font-size: 14px; color: #aaa; line-height: 1.7;
+    margin-bottom: 24px; border-left: 3px solid #c9a84c;
+    padding-left: 16px; font-style: italic;
+  }
+
+  /* ── TOPICS ── */
+  .topics-title {
+    font-size: 11px; font-weight: 700; color: #c9a84c;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .topics-title::after { content:''; flex:1; height:1px; background:#2a2a2a; }
+
+  .topics { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .topic {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #161616; border: 1px solid #252525;
+    border-radius: 10px; padding: 12px 14px;
+    transition: border-color .2s;
+  }
+  .topic:hover { border-color: #3a3020; }
+  .topic-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0; margin-top: 1px;
+  }
+  .topic-text { font-size: 13px; color: #ccc; line-height: 1.5; }
+
+  /* ── SOCIAL PROOF ── */
+  .proof {
+    background: linear-gradient(135deg, #151208, #111);
+    border: 1px solid #2a2216;
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+  }
+  .proof-num { font-size: 28px; font-weight: 900; color: #c9a84c; line-height: 1; }
+  .proof-text { font-size: 12px; color: #888; line-height: 1.5; }
+  .proof-text strong { color: #ddd; }
+
+  /* ── CTA ── */
+  .cta-box {
+    background: #161616; border: 1px solid #2a2a2a;
+    border-radius: 14px; padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .cta-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+  }
+  .platform-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(41,128,185,.15); border: 1px solid rgba(41,128,185,.3);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 12px; color: #5dade2; font-weight: 600;
+  }
+  .vagas-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(192,57,43,.1); border: 1px solid rgba(192,57,43,.3);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 12px; color: #e74c3c; font-weight: 600;
+  }
+  .cta-btn {
+    display: block; width: 100%;
+    background: linear-gradient(135deg, #c9a84c, #e2c06a);
+    color: #000; text-align: center; text-decoration: none;
+    padding: 15px; border-radius: 10px;
+    font-size: 15px; font-weight: 800; letter-spacing: .5px;
+    border: none; cursor: pointer;
+    transition: all .2s; box-shadow: 0 4px 20px rgba(201,168,76,.25);
+  }
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(201,168,76,.4); }
+  .cta-link {
+    font-size: 11px; color: #555; text-align: center;
+    margin-top: 8px; word-break: break-all;
+  }
+  .cta-link a { color: #9a7a30; text-decoration: none; }
+  .cta-link a:hover { color: #c9a84c; text-decoration: underline; }
+
+  /* ── FOOTER ── */
+  .card-footer {
+    border-top: 1px solid #1e1e1e;
+    padding: 16px 36px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: #0e0e0e;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 8px; }
+  .footer-brand img { height: 22px; opacity: .6; }
+  .footer-brand span { font-size: 11px; color: #444; letter-spacing: .5px; }
+  .footer-sig { font-size: 11px; color: #444; text-align: right; }
+  .footer-sig strong { color: #666; }
+
+  @media (max-width: 480px) {
+    .banner, .body { padding-left: 22px; padding-right: 22px; }
+    .card-footer { padding: 14px 22px; flex-direction: column; gap: 8px; text-align: center; }
+    .meta-row { flex-wrap: wrap; }
+    .meta-item { min-width: 50%; }
+    .event-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- BANNER -->
+  <div class="banner">
+    <div class="tag-live"><span class="dot"></span> Ao Vivo</div>
+    <div class="event-type">Workshop Exclusivo</div>
+    <div class="event-title">Sua Carreira<br>rumo ao <span>Conselho</span></div>
+    <div class="event-sub">Entenda o mercado, posicione-se estrategicamente e conquiste espaço nos conselhos empresariais em 2026.</div>
+  </div>
+
+  <!-- META -->
+  <div class="meta-row">
+    <div class="meta-item">
+      <div class="meta-label">Data</div>
+      <div class="meta-value">02 de Junho</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Horário</div>
+      <div class="meta-value gold">19h00</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Formato</div>
+      <div class="meta-value">Online • Zoom</div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- Host -->
+    <div class="host-row">
+      <div class="host-avatar">F</div>
+      <div class="host-info">
+        <div class="host-name">Farias Souza</div>
+        <div class="host-role">CEO da Board Academy</div>
+      </div>
+    </div>
+
+    <div class="with-row">
+      <div class="with-badge">com participação de <strong>Marcelo Simonato</strong></div>
+    </div>
+
+    <!-- Intro -->
+    <div class="intro">
+      O mercado de conselheiros empresariais está passando por uma das maiores transformações dos últimos anos — e entender esse movimento pode definir quem vai ocupar espaço estratégico em 2026.
+    </div>
+
+    <!-- Topics -->
+    <div class="topics-title">O que vamos abordar</div>
+    <div class="topics">
+      <div class="topic">
+        <div class="topic-icon">🏆</div>
+        <div class="topic-text">Quais serão as <strong>competências mais desejadas</strong> pelas empresas em 2026</div>
+      </div>
+      <div class="topic">
+        <div class="topic-icon">📈</div>
+        <div class="topic-text">Como a <strong>profissionalização dos conselhos</strong> está abrindo novas vagas estratégicas em governança</div>
+      </div>
+      <div class="topic">
+        <div class="topic-icon">🔍</div>
+        <div class="topic-text">Por que cada vez mais executivos e especialistas estão assumindo <strong>posições estratégicas</strong></div>
+      </div>
+      <div class="topic">
+        <div class="topic-icon">⚡</div>
+        <div class="topic-text">O que realmente diferencia quem <strong>ocupa as cadeiras mais disputadas</strong></div>
+      </div>
+      <div class="topic">
+        <div class="topic-icon">🗺️</div>
+        <div class="topic-text">Como se preparar agora para <strong>aproveitar este ciclo de expansão</strong></div>
+      </div>
+    </div>
+
+    <!-- Social proof -->
+    <div class="proof">
+      <div class="proof-num">12.500</div>
+      <div class="proof-text">
+        <strong>Conselheiros empresariais formados</strong> pela Board Academy.<br>
+        Um mapa claro e aplicável construído a partir dessa experiência.
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <div class="cta-top">
+        <div class="platform-badge">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.882v6.236a1 1 0 0 1-1.447.894L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
+          Online pelo Zoom
+        </div>
+        <div class="vagas-badge">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Vagas Limitadas
+        </div>
+      </div>
+      <a href="https://boardbr.com/SalaDeConselho" target="_blank" class="cta-btn">
+        Confirmar minha vaga →
+      </a>
+      <div class="cta-link">
+        <a href="https://boardbr.com/SalaDeConselho">boardbr.com/SalaDeConselho</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="card-footer">
+    <div class="footer-brand">
+      <img src="logo.png" alt="Board" onerror="this.style.display='none'">
+      <span>Board Academy</span>
+    </div>
+    <div class="footer-sig">
+      <strong>Inteligência Comercial</strong><br>
+      boardbr.com
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
