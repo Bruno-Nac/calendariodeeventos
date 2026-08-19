@@ -179,6 +179,7 @@ input[type=url], input[type=number], textarea {
 }
 select:focus, input:focus, textarea:focus { border-color: var(--gold); }
 .filter-group select { background: transparent; border: none; padding: 0 4px; }
+.filter-group-search input[type=text] { width: 180px; }
 
 /* ── TABLE ── */
 .table-wrap {
@@ -657,6 +658,11 @@ footer .sep  { color: var(--border); }
   .brand-text h1 { font-size: 13px; }
   .user-chip .uc-name { display: none; }
   .btn-gold { padding: 7px 12px; font-size: 12px; }
+  /* Botões do header viram só ícone — com texto, o header-actions estoura a largura da tela */
+  .header-actions { gap: 6px; }
+  .header-actions .btn-label { display: none; }
+  .header-actions .btn { padding: 8px; }
+  .theme-wrap .theme-label { display: none; }
 
   /* ── App layout ── */
   .app-layout { flex-direction: column; }
@@ -685,7 +691,9 @@ footer .sep  { color: var(--border); }
   /* ── Filtros ── */
   .filters { flex-wrap: wrap; gap: 10px; }
   .filter-group { flex: 1; min-width: calc(50% - 6px); }
-  .filter-group:last-child { flex: 1 1 100%; }
+  /* Busca por texto sempre em linha própria, ocupando a largura toda */
+  .filter-group-search { flex: 1 1 100%; }
+  .filter-group-search input[type=text] { width: 100%; }
 
   /* ── Tabela → scroll horizontal com colunas prioritárias ── */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
@@ -738,6 +746,16 @@ footer .sep  { color: var(--border); }
 
   /* ── Footer ── */
   footer { display: none; }
+}
+
+/* Telas de celular estreitas (ex: iPhone SE, 375px e menores) — aperta mais o header
+   pra caber logo + status + tema + usuário + 2 botões de ação sem estourar a largura */
+@media (max-width: 420px) {
+  header { padding: 0 10px; }
+  .brand-text h1 { display: none; }
+  .header-actions { gap: 4px; }
+  .header-actions .btn { padding: 6px; }
+  #syncStatus { display: none; }
 }
 </style>
 </head>
@@ -881,11 +899,11 @@ footer .sep  { color: var(--border); }
     </div>
     <button class="btn btn-outline admin-only" id="btnPipedriveSync" onclick="bulkSyncPipedrive()" title="Atualiza os números de todos os eventos com dados reais do Pipedrive">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
-      Atualizar Pipedrive
+      <span class="btn-label">Atualizar Pipedrive</span>
     </button>
-    <button class="btn btn-gold admin-only" onclick="openEventForm()">
+    <button class="btn btn-gold admin-only" onclick="openEventForm()" title="Novo Evento">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Novo Evento
+      <span class="btn-label">Novo Evento</span>
     </button>
   </div>
 </header>
@@ -975,9 +993,9 @@ footer .sep  { color: var(--border); }
           <option value="11">Novembro</option><option value="12">Dezembro</option>
         </select>
       </div>
-      <div class="filter-group">
+      <div class="filter-group filter-group-search">
         <label>Buscar</label>
-        <input type="text" id="filterSearch" placeholder="nome ou produto…" oninput="renderTable()" style="width:180px">
+        <input type="text" id="filterSearch" placeholder="nome ou produto…" oninput="renderTable()">
       </div>
       <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Limpar</button>
     </div>
@@ -1052,11 +1070,15 @@ footer .sep  { color: var(--border); }
 
       <div class="chart-card">
         <div class="chart-card-title">Aplicados · Ganhos · Perdidos por Workshop</div>
-        <div style="position:relative;height:300px"><canvas id="chartVendasProduto"></canvas></div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <div style="position:relative;height:300px;min-width:600px"><canvas id="chartVendasProduto"></canvas></div>
+        </div>
       </div>
       <div class="chart-card" style="margin-top:16px">
         <div class="chart-card-title">Evolução por Evento</div>
-        <div style="position:relative;height:280px"><canvas id="chartVendasTempo"></canvas></div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <div style="position:relative;height:280px;min-width:600px"><canvas id="chartVendasTempo"></canvas></div>
+        </div>
       </div>
 
       <div class="chart-card" style="margin-top:16px">
@@ -2883,7 +2905,7 @@ function renderVendorRankingTable(fullList, maxRows) {
     : `<span style="color:var(--text-dim);font-weight:700">${i + 1}º</span>`;
 
   return `
-    <div style="max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+    <div style="max-height:420px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px">
       <table style="width:100%;font-size:12px;border-collapse:collapse">
         <thead><tr style="text-align:left;color:var(--text-dim);position:sticky;top:0;background:var(--card2)">
           <th style="padding:8px 10px;width:32px"></th>
@@ -2973,7 +2995,7 @@ function renderDealsTable(deals, showValor, showStatus) {
   const domain = loadPipedriveCfg().domain || 'boardacademy.pipedrive.com';
   return `
     ${showValor ? `<div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">Total: <strong style="color:#58d68d">${fmtBRL(total)}</strong> · ${deals.length} negócio${deals.length !== 1 ? 's' : ''}</div>` : ''}
-    <div style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+    <div style="max-height:340px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px">
       <table style="width:100%;font-size:12px;border-collapse:collapse">
         <thead><tr style="text-align:left;color:var(--text-dim);position:sticky;top:0;background:var(--card2)">
           <th style="padding:8px 10px">ID</th><th style="padding:8px 10px">Proprietário</th><th style="padding:8px 10px">Funil</th>
@@ -3053,7 +3075,7 @@ function renderAbertosDetalhe(deals, stageFiltro, setterFnName) {
       ${pill('Todos', '__all__')}
       ${entries.map(([stage]) => pill(stage, stage)).join('')}
     </div>
-    <div style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+    <div style="max-height:340px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px">
       <table style="width:100%;font-size:12px;border-collapse:collapse">
         <thead><tr style="text-align:left;color:var(--text-dim);position:sticky;top:0;background:var(--card2)">
           <th style="padding:8px 10px">ID</th><th style="padding:8px 10px">Negócio</th><th style="padding:8px 10px">Etapa</th>
@@ -3071,7 +3093,7 @@ function renderGanhosTable(deals) {
   const domain = loadPipedriveCfg().domain || 'boardacademy.pipedrive.com';
   return `
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">Total: <strong style="color:#58d68d">${fmtBRL(total)}</strong> · ${deals.length} negócio${deals.length !== 1 ? 's' : ''}</div>
-    <div style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+    <div style="max-height:340px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px">
       <table style="width:100%;font-size:12px;border-collapse:collapse">
         <thead><tr style="text-align:left;color:var(--text-dim);position:sticky;top:0;background:var(--card2)">
           <th style="padding:8px 10px">ID</th><th style="padding:8px 10px">Negócio</th><th style="padding:8px 10px">Proprietário</th>
@@ -3098,7 +3120,7 @@ function renderPerdidosTable(deals) {
   const domain = loadPipedriveCfg().domain || 'boardacademy.pipedrive.com';
   return `
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">${deals.length} negócio${deals.length !== 1 ? 's' : ''}</div>
-    <div style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+    <div style="max-height:340px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px">
       <table style="width:100%;font-size:12px;border-collapse:collapse">
         <thead><tr style="text-align:left;color:var(--text-dim);position:sticky;top:0;background:var(--card2)">
           <th style="padding:8px 10px">ID</th><th style="padding:8px 10px">Negócio</th><th style="padding:8px 10px">Etapa</th>
