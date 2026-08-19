@@ -1971,10 +1971,11 @@ function confirmResetPass() {
 const _RTDB_BASE = 'https://calendario-workshops-default-rtdb.firebaseio.com/ic';
 
 // ── Autenticação anônima do Firebase ──
-// A chave de API do Firebase abaixo NÃO é um segredo — é um identificador público do
-// projeto (padrão dos apps web do Firebase). A segurança de verdade vem das regras do
-// banco (exigem "auth != null") e do login com senha do nosso próprio app.
-const _FB_API_KEY = 'AIzaSyA6XUkW4utxDqy5LvxfpoJJMYlm231L-js';
+// A chave de API do Firebase NÃO é um segredo — é um identificador público do projeto
+// (padrão dos apps web do Firebase). A segurança de verdade vem das regras do banco
+// (exigem "auth != null") e do login com senha do nosso próprio app. Mesmo assim, ela
+// é injetada aqui via env var do Vercel (FIREBASE_API_KEY) na hora do build — ver build.js.
+const _FB_API_KEY = '__FIREBASE_API_KEY__';
 let _fbAuthToken = null, _fbAuthExpiry = 0, _fbAuthPromise = null;
 
 async function fbEnsureAuth() {
