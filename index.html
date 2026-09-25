@@ -2540,15 +2540,19 @@ async function bulkSyncPipedrive() {
       const lost = rawLost.filter(matches);
       if (!open.length && !won.length && !lost.length) return; // nada encontrado para este evento
 
-      const wonDeduped = pdDeduplicateParceled(won);
+      // Reserva + residual (título terminando em "1/2"/"2/2") contam como 1 venda só —
+      // mas apenas quando as duas parcelas estão no MESMO status (evita juntar coisas com status divergente)
+      const openDeduped = pdDeduplicateParceled(open);
+      const wonDeduped  = pdDeduplicateParceled(won);
+      const lostDeduped = pdDeduplicateParceled(lost);
       const valorGanho  = wonDeduped.reduce((a, d) => a + (d.value || 0), 0);
-      const aplicados   = open.length + wonDeduped.length + lost.length;
+      const aplicados   = openDeduped.length + wonDeduped.length + lostDeduped.length;
 
       e.pipedrive_utm       = resolvedUtm;
       e.pipedrive_aplicados = aplicados;
-      e.pipedrive_abertos   = open.length;
+      e.pipedrive_abertos   = openDeduped.length;
       e.pipedrive_ganhos    = wonDeduped.length;
-      e.pipedrive_perdidos  = lost.length;
+      e.pipedrive_perdidos  = lostDeduped.length;
       e.pipedrive_valorganho = valorGanho;
       e.pipedrive_lastsync  = new Date().toISOString();
       e.aplicacoes  = aplicados;
@@ -2557,7 +2561,7 @@ async function bulkSyncPipedrive() {
       e.updatedAt   = new Date().toISOString();
       // Guarda a lista (resumida) dos negócios para permitir drill-down sem nova chamada à API
       e.pipedrive_deals = {
-        abertos: open.map(d => ({
+        abertos: openDeduped.map(d => ({
           id: d.id, title: d.title || '—', value: d.value || 0, owner: dealOwner(d), funil: dealFunil(d),
           stage: dealStage(d), criacao: d.add_time || null, ultimaAplicacao: d[PD_FIELD_ULTIMA_APLICACAO] || null,
         })),
@@ -2565,7 +2569,7 @@ async function bulkSyncPipedrive() {
           id: d.id, title: d.title || '—', value: d.value || 0, owner: dealOwner(d), funil: dealFunil(d),
           criacao: d.add_time || null, ultimaAplicacao: d[PD_FIELD_ULTIMA_APLICACAO] || null, ganhoEm: d.won_time || d.close_time || null,
         })),
-        perdidos: lost.map(d => ({
+        perdidos: lostDeduped.map(d => ({
           id: d.id, title: d.title || '—', value: d.value || 0, motivo: d.lost_reason || 'Sem motivo', owner: dealOwner(d), funil: dealFunil(d),
           stage: dealStage(d), ultimaAplicacao: d[PD_FIELD_ULTIMA_APLICACAO] || null, dataPerda: d.lost_time || d.close_time || null,
         })),
@@ -2630,18 +2634,20 @@ function pdIsStageHighlight(name) {
 // (não faz nenhuma chamada à API — quem atualiza os números é sempre o botão "Atualizar Pipedrive").
 // ── Hierarquia Gestão → Funil (visão de vendas em etapas) ──
 const PD_GESTOES = {
-  denise:   { label: 'Gestão Denise', funis: ['elite','sniper','olimpus','navigator'] },
-  vanguard: { label: 'Vanguard',      funis: ['vanguard'] },
-  thais:    { label: 'Gestão Thais',  funis: ['orion','latam','licenciados'] },
+  denise:   { label: 'Gestão Denise',   funis: ['navigator','mgm'] },
+  vanguard: { label: 'Vanguard',        funis: ['vanguard'] },
+  thais:    { label: 'Gestão Thais',    funis: ['elite','sniper','olimpus','orion'] },
+  catarina: { label: 'Gestão Catarina', funis: ['latam'] },
+  // "licenciados" não pertence a nenhuma gestão no momento — fica só na Visão Geral
 };
 const PD_FUNIL_LABELS = {
   elite:'Elite', sniper:'Sniper', olimpus:'Olimpus', navigator:'Navigator',
-  vanguard:'Vanguard', orion:'Orion', latam:'LATAM', licenciados:'Licenciados',
+  vanguard:'Vanguard', orion:'Orion', latam:'LATAM', licenciados:'Licenciados', mgm:'MGM',
 };
 // Aceita variação de grafia (ex: Olympus/Olimpus) — o nome real do pipeline no Pipedrive pode diferir levemente
 const PD_FUNIL_KEYWORDS = {
   elite:['elite'], sniper:['sniper'], olimpus:['olimpus','olympus'], navigator:['navigator'],
-  vanguard:['vanguard'], orion:['orion'], latam:['latam'],
+  vanguard:['vanguard'], orion:['orion'], latam:['latam'], mgm:['mgm'],
 };
 function pdFunilKey(funilName) {
   const n = (funilName || '').trim().toLowerCase();
@@ -2690,9 +2696,13 @@ function vendasFilteredPorEvento() {
   });
 }
 
+// Gestão com um único funil (ex: Vanguard, Catarina) — pula a segunda linha de filtro e já seleciona o funil direto
+function pdIsSingleFunilGestao(key) {
+  return PD_GESTOES[key]?.funis.length === 1;
+}
 function vendasSetGestao(key) {
   _vendasGestao = key;
-  _vendasFunil  = key === 'vanguard' ? 'vanguard' : 'all';
+  _vendasFunil  = pdIsSingleFunilGestao(key) ? PD_GESTOES[key].funis[0] : 'all';
   renderVendasView(_vendasCache);
   renderVendasDetalhe();
 }
@@ -2756,7 +2766,7 @@ function renderGestaoFiltroBar(elId, gestao, funil, setGestaoFn, setFunilFn) {
       color:${active ? '#000' : 'var(--text-dim)'};transition:all .15s
     ">${label}</button>`;
   };
-  const showFunilRow = gestao !== 'all' && gestao !== 'vanguard';
+  const showFunilRow = gestao !== 'all' && !pdIsSingleFunilGestao(gestao);
   let html = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:${showFunilRow ? '10px' : '0'}">
     ${gestaoBtn('all', 'Visão Geral')}
     ${Object.entries(PD_GESTOES).map(([key, g]) => gestaoBtn(key, g.label)).join('')}
@@ -3212,7 +3222,7 @@ function renderEventoFiltroBar() {
 }
 function eventoSetGestao(key) {
   _eventoGestao = key;
-  _eventoFunil  = key === 'vanguard' ? 'vanguard' : 'all';
+  _eventoFunil  = pdIsSingleFunilGestao(key) ? PD_GESTOES[key].funis[0] : 'all';
   renderEventoFiltroBar();
   renderEventoCardsERanking();
   renderEventoDetalhe();
