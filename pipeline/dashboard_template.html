@@ -1,0 +1,1048 @@
+<title>Régua de Turmas</title>
+<style>
+  :root {
+    --paper: #f2f4f2;
+    --paper-raised: #ffffff;
+    --paper-sunken: #e9ece9;
+    --ink: #16232c;
+    --ink-soft: #4f5f68;
+    --ink-faint: #7c8991;
+    --line: #d9dedb;
+    --line-strong: #c2c9c4;
+    --accent: #1f4b4a;
+    --accent-strong: #163534;
+    --accent-soft: #e2ece9;
+    --accent-ink: #ffffff;
+    --gold: #a9752f;
+    --gold-soft: #f3e7d4;
+    --status-futura: #21714f;
+    --status-futura-soft: #e0efe6;
+    --status-andamento: #a5690a;
+    --status-andamento-soft: #f5e9d4;
+    --status-concluida: #6f7a82;
+    --status-concluida-soft: #e6e9ea;
+    --shadow: 0 1px 2px rgba(22, 35, 44, 0.06), 0 8px 24px -12px rgba(22, 35, 44, 0.18);
+    --radius: 10px;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #10171a;
+      --paper-raised: #172023;
+      --paper-sunken: #0c1214;
+      --ink: #e7ece9;
+      --ink-soft: #a7b3ae;
+      --ink-faint: #77857f;
+      --line: #2a3538;
+      --line-strong: #3a4649;
+      --accent: #56a99a;
+      --accent-strong: #7bc2b3;
+      --accent-soft: #17302c;
+      --accent-ink: #0c1614;
+      --gold: #d3a25a;
+      --gold-soft: #2e2313;
+      --status-futura: #4fae7f;
+      --status-futura-soft: #17301f;
+      --status-andamento: #d3a04a;
+      --status-andamento-soft: #332711;
+      --status-concluida: #8b9a95;
+      --status-concluida-soft: #202a2c;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #10171a;
+    --paper-raised: #172023;
+    --paper-sunken: #0c1214;
+    --ink: #e7ece9;
+    --ink-soft: #a7b3ae;
+    --ink-faint: #77857f;
+    --line: #2a3538;
+    --line-strong: #3a4649;
+    --accent: #56a99a;
+    --accent-strong: #7bc2b3;
+    --accent-soft: #17302c;
+    --accent-ink: #0c1614;
+    --gold: #d3a25a;
+    --gold-soft: #2e2313;
+    --status-futura: #4fae7f;
+    --status-futura-soft: #17301f;
+    --status-andamento: #d3a04a;
+    --status-andamento-soft: #332711;
+    --status-concluida: #8b9a95;
+    --status-concluida-soft: #202a2c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light dark; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); color: var(--ink); }
+  button { font: inherit; }
+  a { color: var(--accent-strong); }
+
+  .app {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .topbar__title { display: flex; align-items: center; gap: 14px; }
+  .topbar__mark {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    flex: none;
+  }
+  .topbar__title h1 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 2px;
+    letter-spacing: 0.2px;
+    text-wrap: balance;
+  }
+  .topbar__meta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .topbar__meta strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- KPIs ---------- */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .kpi {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: var(--shadow);
+  }
+  .kpi__value {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .kpi__label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .kpi--accent .kpi__value { color: var(--accent-strong); }
+  .kpi--gold .kpi__value { color: var(--gold); }
+  .kpi--warn .kpi__value { color: var(--status-andamento); }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--paper);
+    padding: 10px 0;
+    margin: 0 -2px;
+  }
+  .tabs {
+    display: inline-flex;
+    background: var(--paper-sunken);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .tabs button {
+    border: none;
+    background: none;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] {
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+  .toolbar__filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .select, .search {
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .select:focus-visible, .search:focus-visible, button:focus-visible, .card:focus-visible {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+  }
+  .search { width: 240px; }
+  .search::placeholder { color: var(--ink-faint); }
+
+  /* ---------- Program groups ---------- */
+  .program-group { display: flex; flex-direction: column; gap: 12px; }
+  .program-group__head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--line);
+    background: none; border-top: none; border-left: none; border-right: none;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+  }
+  .program-group__head:hover .program-group__chevron { color: var(--ink); }
+  .program-group__chevron {
+    flex: none;
+    display: flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    color: var(--ink-faint);
+    transition: transform 0.15s ease;
+  }
+  .program-group__head[aria-expanded="false"] .program-group__chevron { transform: rotate(-90deg); }
+  .program-group__head h2 {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .program-group__count {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-left: auto;
+  }
+  .program-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .program-group__head[aria-expanded="false"] + .program-grid { display: none; }
+  .empty-state {
+    color: var(--ink-faint);
+    font-size: 13.5px;
+    padding: 30px 0;
+    text-align: center;
+  }
+
+  /* ---------- Turma card ---------- */
+  .card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: var(--shadow);
+    transition: transform 0.12s ease, border-color 0.12s ease;
+  }
+  .card:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+  .card__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .card__title {
+    font-family: var(--serif);
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .status-pill {
+    flex: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; }
+  .status-pill--futura { background: var(--status-futura-soft); color: var(--status-futura); }
+  .status-pill--futura::before { background: var(--status-futura); }
+  .status-pill--andamento { background: var(--status-andamento-soft); color: var(--status-andamento); }
+  .status-pill--andamento::before { background: var(--status-andamento); }
+  .status-pill--concluida { background: var(--status-concluida-soft); color: var(--status-concluida); }
+  .status-pill--concluida::before { background: var(--status-concluida); }
+
+  .card__meta {
+    display: flex; flex-wrap: wrap; gap: 6px 10px;
+    font-size: 12.5px; color: var(--ink-soft);
+  }
+  .card__meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .card__dates {
+    font-size: 13px; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    padding-top: 6px;
+    border-top: 1px dashed var(--line);
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  }
+  .card__dates b { font-weight: 600; }
+
+  .vagas-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .vagas-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .vagas-chip--atingido { color: var(--status-futura); }
+  .vagas-chip--atingido::before { background: var(--status-futura); }
+  .vagas-chip--abaixo { color: var(--status-andamento); }
+  .vagas-chip--abaixo::before { background: var(--status-andamento); }
+  .vagas-chip--sem_config { color: var(--ink-faint); }
+  .vagas-chip--sem_config::before { background: var(--ink-faint); }
+
+  .vagas-panel { display: flex; flex-direction: column; gap: 8px; }
+  .vagas-panel__row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .vagas-panel__row strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+  .vagas-panel__note { font-size: 12.5px; color: var(--ink-soft); }
+  .vagas-bar {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--paper-sunken);
+    overflow: visible;
+  }
+  .vagas-bar__fill {
+    position: absolute; left: 0; top: 0; height: 100%;
+    border-radius: 999px;
+    background: var(--status-andamento);
+  }
+  .vagas-bar__fill.is-atingido { background: var(--status-futura); }
+  .vagas-bar__min-marker {
+    position: absolute; top: -3px; width: 2px; height: 14px;
+    background: var(--ink-faint);
+  }
+
+  /* ---------- Comunidades ---------- */
+  .comunidades { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+  .comunidades__head h2 {
+    font-family: var(--serif); font-size: 18px; font-weight: 600; margin: 0 0 4px;
+  }
+  .comunidades__head p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .comunidade-series { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .comunidade-series__head { display: flex; align-items: baseline; gap: 8px; }
+  .comunidade-series__head h3 {
+    font-family: var(--serif); font-size: 15px; font-weight: 600; margin: 0;
+  }
+  .comunidade-series__count { font-size: 12px; color: var(--ink-faint); }
+  .timeline {
+    list-style: none; margin: 0; padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .timeline li {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .timeline .ev-date {
+    font-size: 12px; font-weight: 700; color: var(--gold);
+    text-transform: uppercase; letter-spacing: 0.4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timeline .ev-serie { font-size: 12.5px; color: var(--ink-soft); }
+  .timeline .ev-tema { font-size: 13.5px; font-weight: 600; }
+  .timeline .ev-convidado { font-size: 12.5px; color: var(--ink-soft); }
+  .comunidade-series__empty {
+    font-size: 13px; color: var(--ink-faint);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin-top: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-faint);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+
+  /* ---------- Detail overlay ---------- */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 16, 18, 0.42);
+    display: flex; justify-content: flex-end;
+    z-index: 50;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.16s ease;
+  }
+  .overlay.is-open { opacity: 1; pointer-events: auto; }
+  .panel {
+    width: min(560px, 100%);
+    height: 100%;
+    background: var(--paper-raised);
+    box-shadow: -8px 0 30px rgba(0,0,0,0.18);
+    display: flex; flex-direction: column;
+    transform: translateX(24px);
+    transition: transform 0.16s ease;
+  }
+  .overlay.is-open .panel { transform: translateX(0); }
+  .panel__head {
+    padding: 20px 22px 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+  }
+  .panel__head h3 {
+    font-family: var(--serif); font-size: 19px; font-weight: 600; margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .panel__close {
+    background: var(--paper-sunken); border: 1px solid var(--line);
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink-soft); flex: none;
+  }
+  .panel__body { padding: 16px 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+  .panel__actions { padding: 14px 22px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    border-radius: 8px; border: 1px solid transparent;
+    padding: 9px 16px; font-size: 13.5px; font-weight: 600;
+    cursor: pointer;
+  }
+  .btn--primary { background: var(--accent); color: var(--accent-ink); }
+  .btn--primary:hover { background: var(--accent-strong); }
+  .btn--ghost { background: var(--paper-raised); border-color: var(--line); color: var(--ink); }
+  .btn--ghost:hover { border-color: var(--line-strong); }
+  .btn[disabled] { opacity: 0.55; cursor: default; }
+
+  .aula-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .aula-table th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--ink-faint); padding: 0 8px 6px 0; font-weight: 600;
+    border-bottom: 1px solid var(--line);
+  }
+  .aula-table td {
+    padding: 7px 8px 7px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .aula-table td.col-data { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-soft); }
+  .aula-table tr:last-child td { border-bottom: none; }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  .table-scroll .aula-table { min-width: 420px; }
+  .table-scroll th, .table-scroll td { padding-left: 10px; }
+
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
+  .kv dt { color: var(--ink-faint); }
+  .kv dd { margin: 0; font-weight: 600; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--ink); color: var(--paper);
+    padding: 10px 18px; border-radius: 8px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 100; box-shadow: var(--shadow);
+  }
+  .toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 880px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .panel { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .overlay, .panel { transition: none; }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="topbar__title">
+      <div class="topbar__mark">🎓</div>
+      <div>
+        <h1>Régua de Turmas</h1>
+        <p class="topbar__meta">Board Academy · captura de <strong id="snapshot-date">—</strong></p>
+      </div>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="toolbar">
+    <div class="tabs" id="status-tabs" role="tablist" aria-label="Filtrar por status">
+      <button role="tab" data-status="ativas" aria-selected="true" type="button">Ativas &amp; futuras</button>
+      <button role="tab" data-status="todas" aria-selected="false" type="button">Todas</button>
+      <button role="tab" data-status="concluida" aria-selected="false" type="button">Concluídas</button>
+    </div>
+    <div class="toolbar__filters">
+      <select class="select" id="filter-programa" aria-label="Filtrar por programa"></select>
+      <input class="search" id="search" type="search" placeholder="Buscar turma, disciplina ou facilitador…" aria-label="Buscar">
+    </div>
+  </section>
+
+  <main id="program-groups"></main>
+
+  <section class="comunidades">
+    <div class="comunidades__head">
+      <h2>Encontros de Comunidades</h2>
+      <p>Próximos encontros por comunidade.</p>
+    </div>
+    <div id="comunidades-list"></div>
+  </section>
+
+  <footer>
+    <span>Fonte: <span id="fonte-arquivo">—</span> · dados extraídos manualmente do SharePoint.</span>
+    <span id="footer-count"></span>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+    <div class="panel__head">
+      <div>
+        <h3 id="panel-title"></h3>
+        <div class="kv" id="panel-kv"></div>
+      </div>
+      <button class="panel__close" id="panel-close" type="button" aria-label="Fechar">✕</button>
+    </div>
+    <div class="panel__body">
+      <div class="vagas-panel" id="panel-vagas"></div>
+      <div class="table-scroll">
+        <table class="aula-table">
+          <thead>
+            <tr><th>Data</th><th>Horário</th><th>Disciplina</th><th>Facilitador</th></tr>
+          </thead>
+          <tbody id="panel-aulas"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel__actions">
+      <button class="btn btn--primary" id="export-btn" type="button">Baixar resumo para o cliente (imagem)</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="application/json" id="dashboard-data">__DATA_PLACEHOLDER__</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("dashboard-data").textContent);
+  var TODAY = "2026-08-18";
+
+  var STATUS_LABEL = { futura: "Futura", andamento: "Em andamento", concluida: "Concluída" };
+
+  var state = { statusTab: "ativas", programa: "todos", query: "", collapsed: {} };
+
+  function fmtDateBR(iso) {
+    if (!iso) return "";
+    var p = iso.split("-");
+    return p[2] + "/" + p[1] + "/" + p[0];
+  }
+  function fmtDateLong(iso) {
+    if (!iso) return "a definir";
+    var meses = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+    var p = iso.split("-").map(Number);
+    return p[2] + " " + meses[p[1] - 1] + " " + p[0];
+  }
+
+  function programs() {
+    var seen = [];
+    DATA.turmas.forEach(function (t) {
+      if (seen.indexOf(t.programa) === -1) seen.push(t.programa);
+    });
+    if (DATA.program_order) {
+      seen.sort(function (a, b) {
+        return DATA.program_order.indexOf(a) - DATA.program_order.indexOf(b);
+      });
+    }
+    return seen;
+  }
+
+  function programLabel(p) {
+    return (DATA.program_labels && DATA.program_labels[p]) || p;
+  }
+
+  function populateFilters() {
+    var sel = document.getElementById("filter-programa");
+    var opt = document.createElement("option");
+    opt.value = "todos"; opt.textContent = "Todos os programas";
+    sel.appendChild(opt);
+    programs().forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p; o.textContent = programLabel(p);
+      sel.appendChild(o);
+    });
+    sel.addEventListener("change", function () { state.programa = sel.value; render(); });
+  }
+
+  function matchesQuery(t, q) {
+    if (!q) return true;
+    q = q.toLowerCase();
+    if (t.turma.toLowerCase().indexOf(q) !== -1) return true;
+    for (var i = 0; i < t.aulas.length; i++) {
+      var a = t.aulas[i];
+      if ((a.disciplina || "").toLowerCase().indexOf(q) !== -1) return true;
+      if ((a.facilitador || "").toLowerCase().indexOf(q) !== -1) return true;
+    }
+    return false;
+  }
+
+  function filteredTurmas() {
+    return DATA.turmas.filter(function (t) {
+      if (state.statusTab === "ativas" && !(t.status === "futura" || t.status === "andamento")) return false;
+      if (state.statusTab === "concluida" && t.status !== "concluida") return false;
+      if (state.programa !== "todos" && t.programa !== state.programa) return false;
+      if (!matchesQuery(t, state.query)) return false;
+      return true;
+    });
+  }
+
+  function renderKPIs() {
+    var ativas = DATA.turmas.filter(function (t) { return t.status === "futura" || t.status === "andamento"; });
+    var andamento = DATA.turmas.filter(function (t) { return t.status === "andamento"; });
+    var proximaAula = null;
+    ativas.forEach(function (t) {
+      t.aulas.forEach(function (a) {
+        if (a.data && a.data >= TODAY && (!proximaAula || a.data < proximaAula)) proximaAula = a.data;
+      });
+    });
+    var abaixoMinimo = ativas.filter(function (t) {
+      return t.matriculas && t.matriculas.status_capacidade === "abaixo";
+    });
+    var kpis = [
+      { v: ativas.length, l: "Turmas ativas/futuras", cls: "kpi--accent" },
+      { v: andamento.length, l: "Em andamento agora", cls: "" },
+      { v: abaixoMinimo.length, l: "Abaixo do mínimo de alunos", cls: "kpi--warn" },
+      { v: DATA.eventos_comunidades.length, l: "Encontros programados", cls: "kpi--gold" },
+      { v: programs().length, l: "Programas monitorados", cls: "" },
+      { v: proximaAula ? fmtDateBR(proximaAula) : "—", l: "Próxima aula", cls: "" }
+    ];
+    var el = document.getElementById("kpis");
+    el.innerHTML = "";
+    kpis.forEach(function (k) {
+      var d = document.createElement("div");
+      d.className = "kpi " + k.cls;
+      d.innerHTML = '<span class="kpi__value">' + k.v + '</span><span class="kpi__label">' + k.l + '</span>';
+      el.appendChild(d);
+    });
+  }
+
+  function vagasChipHTML(m) {
+    if (!m) return "";
+    if (m.status_capacidade === "sem_config") {
+      return '<span class="vagas-chip vagas-chip--sem_config">' + (m.atual == null ? 0 : m.atual) + ' inscritos</span>';
+    }
+    var label = m.atual + "/" + m.max + " (mín. " + m.min + ")";
+    return '<span class="vagas-chip vagas-chip--' + m.status_capacidade + '">' + label + '</span>';
+  }
+
+  function cardHTML(t) {
+    var statusLabel = STATUS_LABEL[t.status] || t.status;
+    var range = t.data_inicio ? (fmtDateBR(t.data_inicio) + (t.data_fim && t.data_fim !== t.data_inicio ? " – " + fmtDateBR(t.data_fim) : "")) : "datas a definir";
+    return (
+      '<button class="card" data-id="' + t.id + '">' +
+        '<div class="card__top">' +
+          '<h3 class="card__title">' + escapeHTML(t.turma) + '</h3>' +
+          '<span class="status-pill status-pill--' + t.status + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="card__meta">' +
+          (t.modalidade ? '<span>' + t.modalidade + '</span>' : '') +
+          '<span>' + t.total_aulas + ' encontro' + (t.total_aulas === 1 ? '' : 's') + '</span>' +
+        '</div>' +
+        '<div class="card__dates"><b>' + range + '</b>' + vagasChipHTML(t.matriculas) + '</div>' +
+      '</button>'
+    );
+  }
+
+  function escapeHTML(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function render() {
+    var list = filteredTurmas();
+    var groups = {};
+    var order = [];
+    list.forEach(function (t) {
+      if (!groups[t.programa]) { groups[t.programa] = []; order.push(t.programa); }
+      groups[t.programa].push(t);
+    });
+    var root = document.getElementById("program-groups");
+    root.innerHTML = "";
+    if (order.length === 0) {
+      root.innerHTML = '<div class="empty-state">Nenhuma turma encontrada com esses filtros.</div>';
+    }
+    order.forEach(function (p) {
+      var section = document.createElement("section");
+      section.className = "program-group";
+      var items = groups[p];
+      var expanded = state.collapsed[p] !== true;
+      section.innerHTML =
+        '<button type="button" class="program-group__head" aria-expanded="' + expanded + '" data-programa="' + escapeHTML(p) + '">' +
+          '<span class="program-group__chevron" aria-hidden="true">' +
+            '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</span>' +
+          '<h2>' + escapeHTML(programLabel(p)) + '</h2>' +
+          '<span class="program-group__count">' + items.length + ' turma' + (items.length === 1 ? '' : 's') + '</span>' +
+        '</button>' +
+        '<div class="program-grid">' + items.map(cardHTML).join("") + '</div>';
+      root.appendChild(section);
+    });
+    document.getElementById("footer-count").textContent = list.length + " turma" + (list.length === 1 ? "" : "s") + " exibida" + (list.length === 1 ? "" : "s") + " de " + DATA.turmas.length + " no total";
+
+    Array.prototype.forEach.call(root.querySelectorAll(".card"), function (btn) {
+      btn.addEventListener("click", function () { openPanel(btn.getAttribute("data-id")); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll(".program-group__head"), function (head) {
+      head.addEventListener("click", function () {
+        var p = head.getAttribute("data-programa");
+        var nowExpanded = head.getAttribute("aria-expanded") !== "true";
+        state.collapsed[p] = !nowExpanded;
+        head.setAttribute("aria-expanded", String(nowExpanded));
+      });
+    });
+  }
+
+  function renderComunidades() {
+    var el = document.getElementById("comunidades-list");
+    var series = DATA.comunidades_series || [];
+    var bySerie = {};
+    DATA.eventos_comunidades.forEach(function (e) {
+      if (!bySerie[e.serie]) bySerie[e.serie] = [];
+      bySerie[e.serie].push(e);
+    });
+    el.innerHTML = series.map(function (serie) {
+      var evts = bySerie[serie] || [];
+      var body = evts.length
+        ? '<ol class="timeline">' + evts.map(function (e) {
+            return (
+              '<li>' +
+                '<span class="ev-date">' + fmtDateLong(e.data) + '</span>' +
+                (e.tema ? '<span class="ev-tema">' + escapeHTML(e.tema) + '</span>' : '<span class="ev-tema">A definir</span>') +
+                (e.convidado ? '<span class="ev-convidado">Convidado: ' + escapeHTML(e.convidado) + '</span>' : '') +
+              '</li>'
+            );
+          }).join("") + '</ol>'
+        : '<div class="comunidade-series__empty">Nenhum encontro programado no momento.</div>';
+      return (
+        '<div class="comunidade-series">' +
+          '<div class="comunidade-series__head"><h3>' + escapeHTML(serie) + '</h3><span class="comunidade-series__count">' + evts.length + ' programado' + (evts.length === 1 ? '' : 's') + '</span></div>' +
+          body +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  var currentTurma = null;
+
+  function vagasPanelHTML(m) {
+    if (!m) {
+      return '<div class="vagas-panel__note">Sem dados de matrícula cruzados para esta turma.</div>';
+    }
+    if (m.status_capacidade === "sem_config") {
+      return (
+        '<div class="vagas-panel__row"><strong>' + (m.atual == null ? 0 : m.atual) + ' inscritos</strong></div>' +
+        '<div class="vagas-panel__note">Mínimo/máximo não configurados para esta turma no controle de matrículas.</div>'
+      );
+    }
+    var pct = m.max > 0 ? Math.min(100, Math.round((m.atual / m.max) * 100)) : 0;
+    var minPct = m.max > 0 ? Math.min(100, Math.round((m.min / m.max) * 100)) : 0;
+    var note = m.status_capacidade === "atingido"
+      ? "Mínimo de " + m.min + " alunos atingido."
+      : "Faltam " + (m.faltam_para_minimo != null ? m.faltam_para_minimo : (m.min - m.atual)) + " aluno(s) para o mínimo de " + m.min + ".";
+    return (
+      '<div class="vagas-panel__row"><strong>' + m.atual + '</strong><span class="vagas-panel__note">de ' + m.max + ' vagas (mínimo ' + m.min + ')</span></div>' +
+      '<div class="vagas-bar">' +
+        '<div class="vagas-bar__fill' + (m.status_capacidade === "atingido" ? ' is-atingido' : '') + '" style="width:' + pct + '%"></div>' +
+        '<div class="vagas-bar__min-marker" style="left:' + minPct + '%"></div>' +
+      '</div>' +
+      '<div class="vagas-panel__note">' + note + '</div>'
+    );
+  }
+
+  function openPanel(id) {
+    var t = DATA.turmas.filter(function (x) { return x.id === id; })[0];
+    if (!t) return;
+    currentTurma = t;
+    document.getElementById("panel-title").textContent = t.turma;
+    var range = t.data_inicio ? (fmtDateBR(t.data_inicio) + (t.data_fim && t.data_fim !== t.data_inicio ? " – " + fmtDateBR(t.data_fim) : "")) : "a definir";
+    document.getElementById("panel-kv").innerHTML =
+      '<dt>Programa</dt><dd>' + escapeHTML(programLabel(t.programa)) + '</dd>' +
+      '<dt>Status</dt><dd>' + (STATUS_LABEL[t.status] || t.status) + '</dd>' +
+      '<dt>Período</dt><dd>' + range + '</dd>' +
+      (t.modalidade ? '<dt>Modalidade</dt><dd>' + t.modalidade + '</dd>' : '');
+    document.getElementById("panel-vagas").innerHTML = vagasPanelHTML(t.matriculas);
+    document.getElementById("panel-aulas").innerHTML = t.aulas.map(function (a) {
+      return (
+        '<tr>' +
+          '<td class="col-data">' + (a.data ? fmtDateBR(a.data) : (a.data_raw || "a definir")) + '</td>' +
+          '<td>' + escapeHTML(a.horario) + '</td>' +
+          '<td>' + escapeHTML(a.disciplina) + '</td>' +
+          '<td>' + escapeHTML(a.facilitador) + '</td>' +
+        '</tr>'
+      );
+    }).join("");
+    document.getElementById("overlay").classList.add("is-open");
+  }
+  function closePanel() {
+    document.getElementById("overlay").classList.remove("is-open");
+  }
+
+  document.getElementById("panel-close").addEventListener("click", closePanel);
+  document.getElementById("overlay").addEventListener("click", function (e) {
+    if (e.target.id === "overlay") closePanel();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closePanel();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("#status-tabs button"), function (btn) {
+    btn.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll("#status-tabs button"), function (b) { b.setAttribute("aria-selected", "false"); });
+      btn.setAttribute("aria-selected", "true");
+      state.statusTab = btn.getAttribute("data-status");
+      render();
+    });
+  });
+
+  var searchTimer;
+  document.getElementById("search").addEventListener("input", function (e) {
+    clearTimeout(searchTimer);
+    var v = e.target.value;
+    searchTimer = setTimeout(function () { state.query = v; render(); }, 120);
+  });
+
+  var toastTimer;
+  function showToast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("is-visible");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("is-visible"); }, 3600);
+  }
+
+  // ---------- Export to image ----------
+  function wrapText(ctx, text, maxWidth) {
+    var words = String(text || "").split(" ");
+    var lines = [];
+    var cur = "";
+    words.forEach(function (w) {
+      var test = cur ? cur + " " + w : w;
+      if (ctx.measureText(test).width > maxWidth && cur) {
+        lines.push(cur);
+        cur = w;
+      } else {
+        cur = test;
+      }
+    });
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  function buildCanvas(t) {
+    var W = 900;
+    var padX = 48;
+    var rowPadY = 14;
+    var contentW = W - padX * 2 - 200; // discipline column width budget
+    var dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+    // pre-measure with a throwaway canvas
+    var dateColW = 92, horColW = 110, facColW = 180;
+    var measure = document.createElement("canvas").getContext("2d");
+    measure.font = "13px -apple-system, Segoe UI, sans-serif";
+    var dateLinesCache = [], horLinesCache = [], facLinesCache = [];
+    measure.font = "13px Georgia, serif";
+    var discLinesCache = [];
+    var rowHeights = t.aulas.map(function (a, idx) {
+      measure.font = "13px -apple-system, Segoe UI, sans-serif";
+      var dLines = wrapText(measure, a.data ? fmtDateBR(a.data) : (a.data_raw || "a definir"), dateColW);
+      var hLines = wrapText(measure, a.horario, horColW);
+      var fLines = wrapText(measure, a.facilitador, facColW);
+      measure.font = "13px Georgia, serif";
+      var cLines = wrapText(measure, a.disciplina, contentW);
+      dateLinesCache[idx] = dLines; horLinesCache[idx] = hLines; facLinesCache[idx] = fLines; discLinesCache[idx] = cLines;
+      var maxLines = Math.max(dLines.length, hLines.length, fLines.length, cLines.length, 1);
+      return Math.max(30, 16 + maxLines * 16);
+    });
+    var tableTop = 250;
+    var headerRowH = 30;
+    var totalRowsH = rowHeights.reduce(function (a, b) { return a + b; }, 0);
+    var H = tableTop + headerRowH + totalRowsH + 70;
+
+    var canvas = document.createElement("canvas");
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    var ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    // palette (light, print-safe)
+    var ink = "#16232c", inkSoft = "#5b6a72", line = "#dfe3e0", accent = "#1f4b4a", accentSoft = "#e2ece9", paper = "#ffffff", gold = "#a9752f";
+
+    ctx.fillStyle = paper;
+    ctx.fillRect(0, 0, W, H);
+
+    // header band
+    ctx.fillStyle = accentSoft;
+    ctx.fillRect(0, 0, W, 150);
+
+    ctx.fillStyle = accent;
+    ctx.font = "700 13px -apple-system, Segoe UI, sans-serif";
+    ctx.fillText("BOARD ACADEMY", padX, 42);
+    ctx.fillStyle = inkSoft;
+    ctx.font = "12px -apple-system, Segoe UI, sans-serif";
+    ctx.fillText("Cronograma de turma", padX, 60);
+
+    ctx.fillStyle = ink;
+    ctx.font = "600 26px Georgia, serif";
+    var titleLines = wrapText(ctx, t.turma, W - padX * 2);
+    var ty = 96;
+    titleLines.forEach(function (l) { ctx.fillText(l, padX, ty); ty += 30; });
+
+    ctx.font = "13px -apple-system, Segoe UI, sans-serif";
+    ctx.fillStyle = inkSoft;
+    var range = t.data_inicio ? (fmtDateBR(t.data_inicio) + (t.data_fim && t.data_fim !== t.data_inicio ? " a " + fmtDateBR(t.data_fim) : "")) : "datas a definir";
+    var infoLine = t.programa + (t.modalidade ? "  ·  " + t.modalidade : "") + "  ·  " + range + "  ·  " + t.total_aulas + " encontros";
+    ctx.fillText(infoLine, padX, ty + 6);
+
+    // table header
+    var colData = padX, colHor = padX + 100, colDisc = padX + 220, colFac = W - padX - 190;
+    var y = tableTop;
+    ctx.fillStyle = inkSoft;
+    ctx.font = "700 11px -apple-system, Segoe UI, sans-serif";
+    ctx.fillText("DATA", colData, y);
+    ctx.fillText("HORÁRIO", colHor, y);
+    ctx.fillText("DISCIPLINA", colDisc, y);
+    ctx.fillText("FACILITADOR", colFac, y);
+    y += 10;
+    ctx.strokeStyle = line;
+    ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(W - padX, y); ctx.stroke();
+    y += 22;
+
+    t.aulas.forEach(function (a, i) {
+      var rh = rowHeights[i];
+      ctx.font = "13px -apple-system, Segoe UI, sans-serif";
+      ctx.fillStyle = ink;
+      var dy = y;
+      dateLinesCache[i].forEach(function (l) { ctx.fillText(l, colData, dy); dy += 16; });
+      ctx.fillStyle = inkSoft;
+      var hy = y;
+      horLinesCache[i].forEach(function (l) { ctx.fillText(l, colHor, hy); hy += 16; });
+      ctx.fillStyle = ink;
+      ctx.font = "13px Georgia, serif";
+      var ly = y;
+      discLinesCache[i].forEach(function (l) { ctx.fillText(l, colDisc, ly); ly += 16; });
+      ctx.fillStyle = inkSoft;
+      ctx.font = "13px -apple-system, Segoe UI, sans-serif";
+      var fy = y;
+      facLinesCache[i].forEach(function (l) { ctx.fillText(l, colFac, fy); fy += 16; });
+
+      y += rh;
+      ctx.strokeStyle = line;
+      ctx.beginPath(); ctx.moveTo(padX, y - rh + 6); ctx.lineTo(W - padX, y - rh + 6); ctx.stroke();
+    });
+
+    ctx.fillStyle = "#9aa5a0";
+    ctx.font = "11px -apple-system, Segoe UI, sans-serif";
+    ctx.fillText("Gerado em " + fmtDateBR(TODAY) + " · Régua de Turmas — Board Academy", padX, H - 26);
+
+    return canvas;
+  }
+
+  var downloadsCap = null;
+  function getDownloads() {
+    if (!window.claude || typeof window.claude.use !== "function") return Promise.resolve(null);
+    if (downloadsCap) return downloadsCap;
+    downloadsCap = window.claude.use("downloads");
+    return downloadsCap;
+  }
+
+  document.getElementById("export-btn").addEventListener("click", function () {
+    if (!currentTurma) return;
+    var btn = this;
+    btn.disabled = true;
+    var originalLabel = btn.textContent;
+    btn.textContent = "Gerando…";
+    getDownloads().then(function (downloads) {
+      var canvas = buildCanvas(currentTurma);
+      canvas.toBlob(function (blob) {
+        var filename = currentTurma.turma.replace(/[^a-zA-Z0-9À-ÿ ]/g, "").trim().replace(/\s+/g, "-").slice(0, 80) + ".png";
+        if (!downloads) {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+          showToast("Imagem salva: " + filename);
+          btn.disabled = false; btn.textContent = originalLabel;
+          return;
+        }
+        downloads.save({ filename: filename, data: blob }).then(function () {
+          showToast("Imagem salva: " + filename);
+        }).catch(function (err) {
+          if (err && err.code === "declined") {
+            showToast("Download cancelado.");
+          } else {
+            showToast("Não foi possível salvar o arquivo agora.");
+          }
+        }).finally(function () {
+          btn.disabled = false; btn.textContent = originalLabel;
+        });
+      }, "image/png");
+    });
+  });
+
+  // ---------- init ----------
+  document.getElementById("snapshot-date").textContent = fmtDateLong(DATA.gerado_em.slice(0, 10));
+  document.getElementById("fonte-arquivo").textContent = DATA.fonte_arquivo;
+  populateFilters();
+  renderKPIs();
+  renderComunidades();
+  render();
+})();
+</script>

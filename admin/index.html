@@ -1,0 +1,504 @@
+<title>Atualizar dados — Régua de Turmas</title>
+<style>
+  :root {
+    --paper: #f2f4f2; --paper-raised: #ffffff; --paper-sunken: #e9ece9;
+    --ink: #16232c; --ink-soft: #4f5f68; --ink-faint: #7c8991;
+    --line: #d9dedb; --line-strong: #c2c9c4;
+    --accent: #1f4b4a; --accent-strong: #163534; --accent-soft: #e2ece9; --accent-ink: #ffffff;
+    --status-futura: #21714f; --status-futura-soft: #e0efe6;
+    --status-andamento: #a5690a; --status-andamento-soft: #f5e9d4;
+    --status-concluida: #6f7a82; --status-concluida-soft: #e6e9ea;
+    --shadow: 0 1px 2px rgba(22, 35, 44, 0.06), 0 8px 24px -12px rgba(22, 35, 44, 0.18);
+    --radius: 10px;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #10171a; --paper-raised: #172023; --paper-sunken: #0c1214;
+      --ink: #e7ece9; --ink-soft: #a7b3ae; --ink-faint: #77857f;
+      --line: #2a3538; --line-strong: #3a4649;
+      --accent: #56a99a; --accent-strong: #7bc2b3; --accent-soft: #17302c; --accent-ink: #0c1614;
+      --status-futura: #4fae7f; --status-futura-soft: #17301f;
+      --status-andamento: #d3a04a; --status-andamento-soft: #332711;
+      --status-concluida: #8b9a95; --status-concluida-soft: #202a2c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: light dark; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans);
+    font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 22px; }
+  h1 { font-family: var(--serif); font-size: 24px; font-weight: 600; margin: 0 0 4px; }
+  h2 { font-family: var(--serif); font-size: 17px; font-weight: 600; margin: 0; }
+  .subtitle { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+  .card {
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 16px;
+  }
+  label { font-size: 13px; font-weight: 600; color: var(--ink-soft); display: block; margin-bottom: 6px; }
+  input[type="password"], input[type="file"], input[type="text"], input[type="number"], input[type="date"], select {
+    width: 100%; border: 1px solid var(--line); background: var(--paper-sunken); color: var(--ink);
+    border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: var(--sans);
+  }
+  .field { display: flex; flex-direction: column; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row > .field { flex: 1; min-width: 120px; }
+  .dropzone {
+    border: 1.5px dashed var(--line-strong); border-radius: 8px; padding: 16px;
+    background: var(--paper-sunken); font-size: 13px; color: var(--ink-soft); text-align: center;
+    transition: border-color .12s ease, background .12s ease;
+  }
+  .dropzone.is-over { border-color: var(--accent); background: var(--accent-soft); }
+  .dropzone strong { color: var(--ink); }
+  .file-name { font-size: 12.5px; color: var(--accent-strong); margin-top: 6px; font-weight: 600; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border-radius: 8px; border: none; padding: 11px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; background: var(--accent); color: var(--accent-ink);
+  }
+  .btn:hover { background: var(--accent-strong); }
+  .btn[disabled] { opacity: .55; cursor: default; }
+  .btn--ghost { background: var(--paper-sunken); color: var(--ink); border: 1px solid var(--line); }
+  .btn--ghost:hover { background: var(--paper-sunken); border-color: var(--line-strong); }
+  .btn--danger { background: var(--status-andamento-soft); color: var(--status-andamento); }
+  .btn--danger:hover { background: var(--status-andamento-soft); filter: brightness(0.95); }
+  .btn--small { padding: 6px 12px; font-size: 12.5px; }
+  .result { border-radius: 8px; padding: 14px 16px; font-size: 13.5px; display: none; flex-direction: column; gap: 6px; }
+  .result.is-visible { display: flex; }
+  .result.ok { background: var(--status-futura-soft); color: var(--status-futura); }
+  .result.err { background: var(--status-andamento-soft); color: var(--status-andamento); }
+  .result dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 4px 0 0; font-size: 13px; color: var(--ink); }
+  .result dt { color: var(--ink-faint); }
+  .result dd { margin: 0; font-weight: 600; }
+  a.back { font-size: 13px; color: var(--ink-soft); }
+
+  .tabs { display: inline-flex; background: var(--paper-sunken); border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; align-self: flex-start; }
+  .tabs button { border: none; background: none; padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--paper-raised); color: var(--ink); box-shadow: var(--shadow); }
+  .tabpanel[hidden] { display: none; }
+
+  .turma-list { display: flex; flex-direction: column; gap: 8px; }
+  .turma-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--paper-sunken);
+  }
+  .turma-row__title { flex: 1; min-width: 0; }
+  .turma-row__name { font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .turma-row__meta { font-size: 12px; color: var(--ink-faint); }
+  .status-pill { flex: none; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; padding: 3px 8px; border-radius: 999px; }
+  .status-pill--futura { background: var(--status-futura-soft); color: var(--status-futura); }
+  .status-pill--andamento { background: var(--status-andamento-soft); color: var(--status-andamento); }
+  .status-pill--concluida { background: var(--status-concluida-soft); color: var(--status-concluida); }
+  .status-pill--sem_data { background: var(--status-concluida-soft); color: var(--status-concluida); }
+  .turma-row__actions { display: flex; gap: 6px; flex: none; }
+  .empty-state { font-size: 13px; color: var(--ink-faint); padding: 20px; text-align: center; }
+
+  .aula-row { display: grid; grid-template-columns: 130px 110px 1.4fr 1fr auto; gap: 8px; align-items: end; }
+  .aula-row .field { margin: 0; }
+  .aula-row .field label { font-size: 11px; margin-bottom: 4px; }
+  @media (max-width: 600px) { .aula-row { grid-template-columns: 1fr 1fr; } }
+
+  .section-head { display: flex; align-items: center; justify-content: space-between; }
+</style>
+
+<div class="app">
+  <div>
+    <h1>Atualizar dados do painel</h1>
+    <p class="subtitle">Cadastre turmas direto aqui, ou importe uma planilha inteira de uma vez — os dois jeitos atualizam o mesmo painel na hora.</p>
+  </div>
+
+  <div class="card">
+    <div class="field" style="margin-bottom:0;">
+      <label for="password">Senha</label>
+      <input type="password" id="password" autocomplete="current-password" placeholder="Necessária para as duas abas abaixo">
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" aria-selected="true" data-tab="manual">Cadastro manual</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="upload">Upload de planilha</button>
+  </div>
+
+  <!-- ---------------- Manual tab ---------------- -->
+  <div class="tabpanel" id="tab-manual">
+    <div class="card" id="list-card">
+      <div class="section-head">
+        <h2>Turmas cadastradas</h2>
+        <button type="button" class="btn btn--small" id="new-turma-btn">+ Nova turma</button>
+      </div>
+      <div class="turma-list" id="turma-list"><div class="empty-state">Carregando…</div></div>
+    </div>
+
+    <form class="card" id="turma-form" hidden>
+      <div class="section-head">
+        <h2 id="form-title">Nova turma</h2>
+        <button type="button" class="btn btn--ghost btn--small" id="cancel-form-btn">Cancelar</button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-programa">Programa</label>
+          <select id="f-programa"></select>
+        </div>
+        <div class="field" style="flex: 2;">
+          <label for="f-turma">Turma (título)</label>
+          <input type="text" id="f-turma" placeholder="Ex.: PFCC130 Online - Turma de Segunda &amp; Quarta" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-min">Mínimo de alunos</label>
+          <input type="number" id="f-min" min="0">
+        </div>
+        <div class="field">
+          <label for="f-max">Máximo de alunos</label>
+          <input type="number" id="f-max" min="0">
+        </div>
+        <div class="field">
+          <label for="f-atual">Inscritos atuais</label>
+          <input type="number" id="f-atual" min="0">
+        </div>
+      </div>
+
+      <div class="section-head">
+        <label style="margin:0;">Aulas</label>
+        <button type="button" class="btn btn--ghost btn--small" id="add-aula-btn">+ Adicionar aula</button>
+      </div>
+      <div id="aulas-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+      <button class="btn" type="submit" id="save-turma-btn">Salvar turma</button>
+      <div class="result" id="manual-result"></div>
+    </form>
+  </div>
+
+  <!-- ---------------- Upload tab ---------------- -->
+  <div class="tabpanel" id="tab-upload" hidden>
+    <form class="card" id="upload-form">
+      <div class="field">
+        <label for="cronograma">Cronograma Oficial Board - Turmas.xlsx</label>
+        <div class="dropzone" id="drop-cronograma">
+          <div>Arraste o arquivo aqui ou <strong>clique para escolher</strong></div>
+          <input type="file" id="cronograma" name="cronograma" accept=".xlsx" required style="margin-top:10px;">
+          <div class="file-name" id="name-cronograma"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="ocupacao">Ocupação de Turmas.xlsx</label>
+        <div class="dropzone" id="drop-ocupacao">
+          <div>Arraste o arquivo aqui ou <strong>clique para escolher</strong></div>
+          <input type="file" id="ocupacao" name="ocupacao" accept=".xlsx" required style="margin-top:10px;">
+          <div class="file-name" id="name-ocupacao"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="matriculas">Planilha_Master_Controle_Alunos_2026.xlsx</label>
+        <div class="dropzone" id="drop-matriculas">
+          <div>Arraste o arquivo aqui ou <strong>clique para escolher</strong></div>
+          <input type="file" id="matriculas" name="matriculas" accept=".xlsx" required style="margin-top:10px;">
+          <div class="file-name" id="name-matriculas"></div>
+        </div>
+      </div>
+
+      <button class="btn" type="submit" id="submit-btn">Processar e atualizar painel</button>
+
+      <div class="result" id="result"></div>
+    </form>
+  </div>
+
+  <a class="back" href="/">&larr; Voltar para o painel</a>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STATUS_LABEL = { futura: "Futura", andamento: "Em andamento", concluida: "Concluída", sem_data: "Sem data" };
+  var passwordInput = document.getElementById("password");
+
+  // ---------- Tabs ----------
+  var tabButtons = document.querySelectorAll(".tabs button");
+  Array.prototype.forEach.call(tabButtons, function (btn) {
+    btn.addEventListener("click", function () {
+      Array.prototype.forEach.call(tabButtons, function (b) { b.setAttribute("aria-selected", "false"); });
+      btn.setAttribute("aria-selected", "true");
+      document.getElementById("tab-manual").hidden = btn.dataset.tab !== "manual";
+      document.getElementById("tab-upload").hidden = btn.dataset.tab !== "upload";
+    });
+  });
+
+  // ================= Upload tab (unchanged behavior) =================
+  function wireFileInput(inputId, nameId) {
+    var input = document.getElementById(inputId);
+    var nameEl = document.getElementById(nameId);
+    input.addEventListener("change", function () {
+      nameEl.textContent = input.files[0] ? input.files[0].name : "";
+    });
+  }
+  wireFileInput("cronograma", "name-cronograma");
+  wireFileInput("ocupacao", "name-ocupacao");
+  wireFileInput("matriculas", "name-matriculas");
+
+  var uploadForm = document.getElementById("upload-form");
+  var resultEl = document.getElementById("result");
+  var submitBtn = document.getElementById("submit-btn");
+
+  uploadForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Processando…";
+    resultEl.className = "result";
+    resultEl.innerHTML = "";
+
+    var fd = new FormData(uploadForm);
+    fd.append("password", passwordInput.value);
+
+    fetch("/api/process", { method: "POST", body: fd })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          resultEl.className = "result err is-visible";
+          resultEl.textContent = "Erro: " + (res.body.message || res.body.error || "falha desconhecida");
+          return;
+        }
+        var b = res.body;
+        var statusLines = Object.keys(b.status).map(function (k) {
+          return "<dt>" + (STATUS_LABEL[k] || k) + "</dt><dd>" + b.status[k] + "</dd>";
+        }).join("");
+        var unmatched = b.ocupacao_nao_vinculada || [];
+        resultEl.className = "result ok is-visible";
+        resultEl.innerHTML =
+          "<strong>Painel atualizado com sucesso.</strong>" +
+          "<dl><dt>Total de turmas</dt><dd>" + b.total_turmas + "</dd>" +
+          statusLines +
+          "<dt>Encontros programados</dt><dd>" + b.eventos + "</dd></dl>" +
+          (b.parse_errors && b.parse_errors.length ? "<div style=\"margin-top:6px;\">Avisos: " + b.parse_errors.join("; ") + "</div>" : "") +
+          (unmatched.length ? "<div style=\"margin-top:6px;\">" +
+            "Linhas da Ocupação de Turmas sem turma correspondente no Cronograma (" + unmatched.length + "): " +
+            unmatched.map(function (u) { return (u.programa || u.programa_raw) + " " + u.turma_codigo; }).join(", ") +
+            "</div>" : "");
+        loadTurmas();
+      })
+      .catch(function (err) {
+        resultEl.className = "result err is-visible";
+        resultEl.textContent = "Erro de rede: " + err.message;
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Processar e atualizar painel";
+      });
+  });
+
+  [["drop-cronograma", "cronograma", "name-cronograma"], ["drop-ocupacao", "ocupacao", "name-ocupacao"], ["drop-matriculas", "matriculas", "name-matriculas"]].forEach(function (cfg) {
+    var zone = document.getElementById(cfg[0]);
+    var input = document.getElementById(cfg[1]);
+    var nameEl = document.getElementById(cfg[2]);
+    zone.addEventListener("click", function (e) { if (e.target !== input) input.click(); });
+    zone.addEventListener("dragover", function (e) { e.preventDefault(); zone.classList.add("is-over"); });
+    zone.addEventListener("dragleave", function () { zone.classList.remove("is-over"); });
+    zone.addEventListener("drop", function (e) {
+      e.preventDefault();
+      zone.classList.remove("is-over");
+      if (e.dataTransfer.files[0]) {
+        input.files = e.dataTransfer.files;
+        nameEl.textContent = e.dataTransfer.files[0].name;
+      }
+    });
+  });
+
+  // ================= Manual tab =================
+  var DATA = null; // last fetched /api/dashboard-data payload
+  var editingId = null; // null => creating new
+
+  var listEl = document.getElementById("turma-list");
+  var formEl = document.getElementById("turma-form");
+  var formTitle = document.getElementById("form-title");
+  var programaSel = document.getElementById("f-programa");
+  var aulasList = document.getElementById("aulas-list");
+  var manualResult = document.getElementById("manual-result");
+
+  function escapeHTML(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function loadTurmas() {
+    return fetch("/api/dashboard-data", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        DATA = data;
+        populatePrograma();
+        renderList();
+      })
+      .catch(function () {
+        listEl.innerHTML = '<div class="empty-state">Não foi possível carregar as turmas.</div>';
+      });
+  }
+
+  function populatePrograma() {
+    if (!DATA || !DATA.program_order) return;
+    programaSel.innerHTML = "";
+    DATA.program_order.forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p;
+      o.textContent = (DATA.program_labels && DATA.program_labels[p]) || p;
+      programaSel.appendChild(o);
+    });
+  }
+
+  function renderList() {
+    if (!DATA || !DATA.turmas || !DATA.turmas.length) {
+      listEl.innerHTML = '<div class="empty-state">Nenhuma turma cadastrada ainda.</div>';
+      return;
+    }
+    var turmas = DATA.turmas.slice().sort(function (a, b) {
+      return (b.data_inicio || "").localeCompare(a.data_inicio || "");
+    });
+    listEl.innerHTML = turmas.map(function (t) {
+      return '<div class="turma-row" data-id="' + escapeHTML(t.id) + '">' +
+        '<div class="turma-row__title">' +
+          '<div class="turma-row__name">' + escapeHTML(t.turma) + '</div>' +
+          '<div class="turma-row__meta">' + escapeHTML(t.programa) + ' · ' + (t.total_aulas || 0) + ' aula(s)' + '</div>' +
+        '</div>' +
+        '<span class="status-pill status-pill--' + t.status + '">' + (STATUS_LABEL[t.status] || t.status) + '</span>' +
+        '<div class="turma-row__actions">' +
+          '<button type="button" class="btn btn--ghost btn--small" data-action="edit">Editar</button>' +
+          '<button type="button" class="btn btn--danger btn--small" data-action="delete">Excluir</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  listEl.addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    var row = e.target.closest(".turma-row");
+    var id = row.dataset.id;
+    var turma = DATA.turmas.find(function (t) { return t.id === id; });
+    if (btn.dataset.action === "edit") openForm(turma);
+    else if (btn.dataset.action === "delete") deleteTurma(turma);
+  });
+
+  function aulaRowHTML(a) {
+    a = a || {};
+    return '<div class="aula-row">' +
+      '<div class="field"><label>Data</label><input type="date" class="a-data" value="' + escapeHTML(a.data || "") + '"></div>' +
+      '<div class="field"><label>Horário</label><input type="text" class="a-horario" placeholder="19h - 21h" value="' + escapeHTML(a.horario || "") + '"></div>' +
+      '<div class="field"><label>Disciplina</label><input type="text" class="a-disciplina" value="' + escapeHTML(a.disciplina || "") + '"></div>' +
+      '<div class="field"><label>Facilitador</label><input type="text" class="a-facilitador" value="' + escapeHTML(a.facilitador || "") + '"></div>' +
+      '<button type="button" class="btn btn--danger btn--small remove-aula-btn">Remover</button>' +
+    '</div>';
+  }
+
+  document.getElementById("add-aula-btn").addEventListener("click", function () {
+    aulasList.insertAdjacentHTML("beforeend", aulaRowHTML());
+  });
+  aulasList.addEventListener("click", function (e) {
+    if (e.target.classList.contains("remove-aula-btn")) {
+      e.target.closest(".aula-row").remove();
+    }
+  });
+
+  function openForm(turma) {
+    editingId = turma ? turma.id : null;
+    formTitle.textContent = turma ? "Editar turma" : "Nova turma";
+    programaSel.value = turma ? turma.programa : (DATA.program_order ? DATA.program_order[0] : "");
+    document.getElementById("f-turma").value = turma ? turma.turma : "";
+    var m = (turma && turma.matriculas) || {};
+    document.getElementById("f-min").value = m.min != null ? m.min : "";
+    document.getElementById("f-max").value = m.max != null ? m.max : "";
+    document.getElementById("f-atual").value = m.atual != null ? m.atual : "";
+    aulasList.innerHTML = "";
+    var aulas = (turma && turma.aulas && turma.aulas.length) ? turma.aulas : [{}];
+    aulas.forEach(function (a) { aulasList.insertAdjacentHTML("beforeend", aulaRowHTML(a)); });
+    manualResult.className = "result";
+    manualResult.innerHTML = "";
+    formEl.hidden = false;
+    formEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("new-turma-btn").addEventListener("click", function () { openForm(null); });
+  document.getElementById("cancel-form-btn").addEventListener("click", function () { formEl.hidden = true; });
+
+  function numOrNull(v) { return v === "" || v === null || v === undefined ? null : Number(v); }
+
+  formEl.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var aulas = Array.prototype.map.call(aulasList.querySelectorAll(".aula-row"), function (row) {
+      return {
+        data: row.querySelector(".a-data").value || null,
+        horario: row.querySelector(".a-horario").value,
+        disciplina: row.querySelector(".a-disciplina").value,
+        facilitador: row.querySelector(".a-facilitador").value,
+      };
+    }).filter(function (a) { return a.data || a.horario || a.disciplina || a.facilitador; });
+
+    var payload = {
+      id: editingId || undefined,
+      programa: programaSel.value,
+      turma: document.getElementById("f-turma").value,
+      aulas: aulas,
+      matriculas: {
+        min: numOrNull(document.getElementById("f-min").value),
+        max: numOrNull(document.getElementById("f-max").value),
+        atual: numOrNull(document.getElementById("f-atual").value),
+      },
+    };
+
+    var saveBtn = document.getElementById("save-turma-btn");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Salvando…";
+    manualResult.className = "result";
+
+    fetch("/api/turmas", {
+      method: editingId ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json", "X-Admin-Password": passwordInput.value },
+      body: JSON.stringify(payload),
+    })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          manualResult.className = "result err is-visible";
+          manualResult.textContent = "Erro: " + (res.body.message || res.body.error || "falha desconhecida");
+          return;
+        }
+        manualResult.className = "result ok is-visible";
+        manualResult.textContent = "Turma salva com sucesso.";
+        loadTurmas();
+        setTimeout(function () { formEl.hidden = true; }, 700);
+      })
+      .catch(function (err) {
+        manualResult.className = "result err is-visible";
+        manualResult.textContent = "Erro de rede: " + err.message;
+      })
+      .finally(function () {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Salvar turma";
+      });
+  });
+
+  function deleteTurma(turma) {
+    if (!confirm('Excluir a turma "' + turma.turma + '"? Essa ação não pode ser desfeita.')) return;
+    fetch("/api/turmas", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", "X-Admin-Password": passwordInput.value },
+      body: JSON.stringify({ id: turma.id }),
+    })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (res) {
+        if (!res.ok) { alert("Erro ao excluir: " + (res.body.message || res.body.error)); return; }
+        loadTurmas();
+      })
+      .catch(function (err) { alert("Erro de rede: " + err.message); });
+  }
+
+  loadTurmas();
+})();
+</script>

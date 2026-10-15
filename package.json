@@ -1,7 +1,18 @@
 {
-  "name": "calendario-eventos-ic",
-  "private": true,
+  "name": "vercel-repo",
+  "version": "1.0.0",
+  "description": "Dashboard estático (HTML/CSS/JS puro, sem backend) com o cronograma das turmas e programas da Board Academy.",
+  "main": "index.js",
   "scripts": {
-    "build": "node build.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "formidable": "^3.5.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
