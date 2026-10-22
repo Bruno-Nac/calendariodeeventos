@@ -1,0 +1,7 @@
+{
+  "name": "calendario-eventos-ic",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  }
+}
